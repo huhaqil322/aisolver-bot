@@ -64,7 +64,8 @@ async def setup_bot() -> None:
     dp = get_dispatcher()
 
     if settings.TELEGRAM_WEBHOOK_URL:
-        webhook_url = f"{settings.TELEGRAM_WEBHOOK_URL}{settings.API_PREFIX}/webhook"
+        base_url = settings.TELEGRAM_WEBHOOK_URL.rstrip("/")
+        webhook_url = f"{base_url}{settings.API_PREFIX}/webhook"
         logger.info("Setting webhook: %s", webhook_url)
         result = await bot.set_webhook(
             url=webhook_url,
