@@ -1,0 +1,78 @@
+version: "3.9"
+
+x-shared: &shared
+  environment:
+    - ENVIRONMENT=development
+    - DATABASE_URL=postgresql+asyncpg://aisolver:aisolver@postgres:5432/aisolver
+    - REDIS_URL=redis://redis:6379/0
+    - SECRET_KEY=dev-secret-key-change-in-production
+    - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:?}
+    - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+    - TESSERACT_CMD=/usr/bin/tesseract
+    - LOG_LEVEL=DEBUG
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.api.main:app --host 0.0.0.0 --port 8000 --reload"
+    volumes:
+      - .:/app
+      - uploads:/tmp/aisolver/uploads
+      - logs:/var/log/aisolver
+    <<: *shared
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m app.workers.worker
+    volumes:
+      - .:/app
+      - uploads:/tmp/aisolver/uploads
+      - logs:/var/log/aisolver
+    deploy:
+      replicas: 2
+    <<: *shared
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aisolver
+      POSTGRES_PASSWORD: aisolver
+      POSTGRES_DB: aisolver
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aisolver"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads:
+  logs:
