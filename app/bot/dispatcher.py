@@ -29,17 +29,25 @@ def get_bot() -> Bot:
     return _bot
 
 
-def get_dispatcher() -> Dispatcher:
+async def create_storage() -> MemoryStorage | RedisStorage:
+    url = settings.redis_url_str
+    try:
+        from redis.asyncio import Redis
+
+        client = Redis.from_url(url, socket_connect_timeout=2)
+        await client.ping()
+        storage = RedisStorage(client)
+        logger.info("Using Redis storage: %s", url)
+        return storage
+    except Exception:
+        logger.warning("Redis unavailable (%s), falling back to MemoryStorage", url)
+        return MemoryStorage()
+
+
+async def get_dispatcher() -> Dispatcher:
     global _dp
     if _dp is None:
-        storage: MemoryStorage | RedisStorage
-        try:
-            from redis.asyncio import Redis
-
-            redis_client = Redis.from_url(settings.redis_url_str)
-            storage = RedisStorage(redis_client)
-        except Exception:
-            storage = MemoryStorage()
+        storage = await create_storage()
 
         _dp = Dispatcher(storage=storage)
 
@@ -61,7 +69,7 @@ def get_dispatcher() -> Dispatcher:
 
 async def setup_bot() -> None:
     bot = get_bot()
-    dp = get_dispatcher()
+    dp = await get_dispatcher()
 
     if settings.TELEGRAM_WEBHOOK_URL:
         base_url = settings.TELEGRAM_WEBHOOK_URL.rstrip("/")
@@ -81,5 +89,5 @@ async def setup_bot() -> None:
 
 async def start_polling() -> None:
     bot = get_bot()
-    dp = get_dispatcher()
+    dp = await get_dispatcher()
     await dp.start_polling(bot)
