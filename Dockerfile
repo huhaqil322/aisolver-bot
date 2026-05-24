@@ -4,6 +4,7 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    build-essential \
     libpq-dev \
     tesseract-ocr \
     tesseract-ocr-eng \
@@ -56,7 +57,7 @@ ENV PYTHONPATH=/app \
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import httpx; httpx.get('http://localhost:8000/api/v1/health').raise_for_status()"
 
-CMD ["uvicorn", "app.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+COPY start.sh .
+RUN chmod +x start.sh
+CMD ["./start.sh"]
