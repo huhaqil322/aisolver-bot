@@ -51,11 +51,11 @@ class Settings(BaseSettings):
     ENVIRONMENT: Environment = Environment.DEVELOPMENT
     DEBUG: bool = False
     LOG_LEVEL: LogLevel = LogLevel.INFO
-    SECRET_KEY: SecretStr = Field(default=..., alias="SECRET_KEY")
+    SECRET_KEY: SecretStr = Field(default="dev-secret-key-change-in-production", alias="SECRET_KEY")
     API_PREFIX: str = "/api/v1"
 
     # Telegram
-    TELEGRAM_BOT_TOKEN: SecretStr = Field(default=..., alias="TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_TOKEN: SecretStr = Field(default="placeholder:set-telegram-bot-token", alias="TELEGRAM_BOT_TOKEN")
     TELEGRAM_WEBHOOK_URL: str | None = None
     TELEGRAM_WEBHOOK_SECRET: str | None = None
     TELEGRAM_ADMIN_IDS: list[int] = Field(default_factory=list)

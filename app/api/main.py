@@ -10,7 +10,9 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.api.webhook import router as webhook_router
 from app.bot.dispatcher import setup_bot
 from app.config.settings import get_settings
-from app.utils.logger import setup_logging
+from app.utils.logger import setup_logging, get_logger
+
+logger = get_logger(__name__)
 
 settings = get_settings()
 
@@ -18,7 +20,10 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging()
-    await setup_bot()
+    try:
+        await setup_bot()
+    except Exception as e:
+        logger.warning(f"Bot setup failed (non-fatal): {e}")
     yield
     bot = getattr(app.state, "bot", None)
     if bot:
