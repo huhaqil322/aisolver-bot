@@ -20,6 +20,9 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     setup_logging()
+    logger.info("Starting %s v%s (%s)", settings.APP_NAME, settings.APP_VERSION, settings.ENVIRONMENT.value)
+    logger.info("WEBHOOK_URL configured: %s", bool(settings.TELEGRAM_WEBHOOK_URL))
+    logger.info("BOT_TOKEN configured: %s", bool(settings.bot_token) and settings.bot_token != "placeholder:set-telegram-bot-token")
     try:
         await setup_bot()
     except Exception as e:

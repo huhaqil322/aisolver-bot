@@ -10,8 +10,10 @@ from app.bot.handlers import admin, image, payments, problem, profile, start
 from app.bot.handlers.history import router as history_router
 from app.bot.middlewares.throttling import ThrottlingMiddleware
 from app.config.settings import get_settings
+from app.utils.logger import get_logger
 
 settings = get_settings()
+logger = get_logger(__name__)
 
 _bot: Bot | None = None
 _dp: Dispatcher | None = None
@@ -63,13 +65,16 @@ async def setup_bot() -> None:
 
     if settings.TELEGRAM_WEBHOOK_URL:
         webhook_url = f"{settings.TELEGRAM_WEBHOOK_URL}{settings.API_PREFIX}/webhook"
-        await bot.set_webhook(
+        logger.info("Setting webhook: %s", webhook_url)
+        result = await bot.set_webhook(
             url=webhook_url,
             secret_token=settings.TELEGRAM_WEBHOOK_SECRET,
             allowed_updates=dp.resolve_used_update_types(),
             drop_pending_updates=True,
         )
+        logger.info("Webhook set result: %s", result)
     else:
+        logger.warning("TELEGRAM_WEBHOOK_URL not set, deleting webhook")
         await bot.delete_webhook(drop_pending_updates=True)
 
 

@@ -8,8 +8,10 @@ from fastapi import APIRouter, FastAPI, Header, HTTPException, Request, Response
 
 from app.bot.dispatcher import get_bot, get_dispatcher
 from app.config.settings import get_settings
+from app.utils.logger import get_logger
 
 settings = get_settings()
+logger = get_logger(__name__)
 router = APIRouter(prefix=settings.API_PREFIX)
 
 
@@ -20,6 +22,7 @@ async def telegram_webhook(
 ) -> Response:
     if settings.TELEGRAM_WEBHOOK_SECRET:
         if x_telegram_bot_api_secret_token != settings.TELEGRAM_WEBHOOK_SECRET:
+            logger.warning("Invalid secret token")
             raise HTTPException(status_code=403, detail="Invalid secret token")
 
     try:
@@ -27,9 +30,11 @@ async def telegram_webhook(
         bot = get_bot()
         dp = get_dispatcher()
         update = Update.model_validate(body, context={"bot": bot})
+        logger.debug("Received update: %s", update.update_id)
         await dp.feed_update(bot=bot, update=update)
         return Response(status_code=status.HTTP_200_OK)
     except Exception as e:
+        logger.error("Webhook error: %s", e, exc_info=True)
         return Response(status_code=status.HTTP_200_OK)
 
 
