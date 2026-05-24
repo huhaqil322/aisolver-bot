@@ -48,6 +48,9 @@ COPY --chown=app:app . .
 RUN mkdir -p /tmp/aisolver/uploads /var/log/aisolver /data/aisolver \
     && chown -R app:app /tmp/aisolver /var/log/aisolver /data/aisolver
 
+COPY start.sh .
+RUN chmod +x start.sh
+CMD ["./start.sh"]
 USER app
 
 ENV PYTHONPATH=/app \
@@ -58,6 +61,3 @@ ENV PYTHONPATH=/app \
 EXPOSE 8000
 
 
-COPY start.sh .
-RUN chmod +x start.sh
-CMD ["./start.sh"]
