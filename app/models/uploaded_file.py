@@ -38,4 +38,4 @@ class UploadedFile(Base, UUIDMixin, TimestampMixin):
     processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     width: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     height: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    file_metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

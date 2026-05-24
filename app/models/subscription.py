@@ -82,8 +82,7 @@ class Payment(Base, UUIDMixin, TimestampMixin):
     telegram_charge_id: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
     description: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)
-    metadata: Mapped[Optional[dict]] = mapped_column(
-        "metadata_json",  # renamed to avoid reserved keyword
+    payment_metadata: Mapped[Optional[dict]] = mapped_column(
         String(2000),
         nullable=True,
     )

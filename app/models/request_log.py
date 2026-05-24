@@ -60,7 +60,7 @@ class RequestLog(Base, UUIDMixin, TimestampMixin):
     retry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
     user_agent: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    request_metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_cached: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
