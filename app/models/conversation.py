@@ -56,7 +56,7 @@ class Conversation(Base, UUIDMixin, TimestampMixin):
     context: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True, default=dict)
     summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_pinned: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    metadata: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True, default=dict)
+    extra_data: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True, default=dict)
 
     # Relationships
     user: Mapped[User] = relationship(back_populates="conversations")
