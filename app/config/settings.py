@@ -96,7 +96,7 @@ class Settings(BaseSettings):
     GEMINI_TEMPERATURE: float = 0.3
 
     # Default AI Provider
-    DEFAULT_AI_PROVIDER: AIProvider = AIProvider.OPENROUTER
+    DEFAULT_AI_PROVIDER: AIProvider = AIProvider.GEMINI
     AI_FALLBACK_ENABLED: bool = True
     AI_STREAMING_ENABLED: bool = True
 
