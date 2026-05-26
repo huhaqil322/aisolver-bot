@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.storage.redis import RedisStorage
 
-from app.bot.handlers import admin, image, payments, problem, profile, start
+from app.bot.handlers import admin, image, problem, profile, start
 from app.bot.handlers.history import router as history_router
 from app.bot.middlewares.throttling import ThrottlingMiddleware
 from app.config.settings import get_settings
@@ -59,7 +59,6 @@ async def get_dispatcher() -> Dispatcher:
             problem.router,
             image.router,
             profile.router,
-            payments.router,
             admin.router,
             history_router,
         )

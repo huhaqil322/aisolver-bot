@@ -7,7 +7,6 @@ def admin_main_keyboard() -> InlineKeyboardMarkup:
     builder.button(text="📊 Dashboard", callback_data="admin:dashboard")
     builder.button(text="👥 Users", callback_data="admin:users")
     builder.button(text="📈 Analytics", callback_data="admin:analytics")
-    builder.button(text="💳 Subscriptions", callback_data="admin:subscriptions")
     builder.button(text="🔔 Broadcast", callback_data="admin:broadcast")
     builder.button(text="⚙️ Settings", callback_data="admin:settings")
     builder.button(text="📋 Logs", callback_data="admin:logs")

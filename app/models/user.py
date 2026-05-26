@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from app.models.conversation import Conversation
     from app.models.payment import Payment
     from app.models.request_log import RequestLog
-    from app.models.subscription import Subscription
 
 
 class UserLanguage(str, enum.Enum):
@@ -82,7 +81,6 @@ class User(Base, UUIDMixin, TimestampMixin):
         DateTime(timezone=True), nullable=True
     )
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    is_premium: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     feedback_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
@@ -93,9 +91,6 @@ class User(Base, UUIDMixin, TimestampMixin):
 
     # Relationships
     conversations: Mapped[List[Conversation]] = relationship(
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
-    )
-    subscriptions: Mapped[List[Subscription]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
     payments: Mapped[List[Payment]] = relationship(

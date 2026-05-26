@@ -20,7 +20,6 @@ class TaskType(Enum):
     AI_COMPLETION = "ai_completion"
     ANALYTICS = "analytics"
     NOTIFICATION = "notification"
-    SUBSCRIPTION_CHECK = "subscription_check"
     CLEANUP = "cleanup"
     BROADCAST = "broadcast"
 
@@ -132,16 +131,8 @@ async def notification_task_handler(task: Task) -> None:
             continue
 
 
-async def subscription_check_handler(task: Task) -> None:
-    from datetime import datetime, timezone
-
-    current_time = datetime.now(timezone.utc)
-    task.payload["checked_at"] = current_time.isoformat()
-
-
 def setup_task_handlers() -> None:
     queue = get_task_queue()
     queue.register_handler(TaskType.OCR, ocr_task_handler)
     queue.register_handler(TaskType.ANALYTICS, analytics_task_handler)
     queue.register_handler(TaskType.NOTIFICATION, notification_task_handler)
-    queue.register_handler(TaskType.SUBSCRIPTION_CHECK, subscription_check_handler)

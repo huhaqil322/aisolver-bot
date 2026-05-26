@@ -6,7 +6,6 @@ from uuid import UUID
 
 from sqlalchemy import select, func, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.models.user import User, UserStatus
 from app.repositories.base import BaseRepository
@@ -86,7 +85,6 @@ class UserRepository(BaseRepository[User]):
         stmt = (
             select(self._model)
             .where(self._model.is_admin == True)
-            .options(selectinload(self._model.subscriptions))
         )
         result = await self._session.execute(stmt)
         return list(result.scalars().all())

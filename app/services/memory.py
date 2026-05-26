@@ -10,6 +10,7 @@ from app.config.settings import get_settings
 settings = get_settings()
 
 _user_cache: dict[int, dict[str, Any]] = {}
+_history_cache: dict[int, list[dict[str, str]]] = {}
 
 
 async def get_user_context(telegram_user: TelegramUser) -> dict[str, Any]:
@@ -26,13 +27,12 @@ async def get_user_context(telegram_user: TelegramUser) -> dict[str, Any]:
         "first_name": telegram_user.first_name,
         "language": telegram_user.language_code or "en",
         "is_admin": is_admin,
-        "is_premium": False,
         "total_requests": 0,
         "daily_requests": 0,
         "monthly_tokens": 0,
         "total_tokens": 0,
-        "daily_limit": settings.FREE_DAILY_LIMIT,
-        "monthly_limit": settings.FREE_TOKENS_PER_MONTH,
+        "daily_limit": settings.DAILY_LIMIT,
+        "monthly_limit": settings.TOKENS_PER_MONTH,
         "referral_count": 0,
         "conversations_count": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -51,21 +51,19 @@ async def update_user_context(user_id: int, **kwargs: Any) -> None:
 async def get_conversation_history(
     user_id: int, limit: int = 10
 ) -> list[dict[str, str]]:
-    _history: dict[int, list[dict[str, str]]] = {}
-    return _history.get(user_id, [])[-limit:]
+    return _history_cache.get(user_id, [])[-limit:]
 
 
 async def add_to_history(user_id: int, role: str, content: str) -> None:
-    _history: dict[int, list[dict[str, str]]] = {}
-    if user_id not in _history:
-        _history[user_id] = []
-    _history[user_id].append({
+    if user_id not in _history_cache:
+        _history_cache[user_id] = []
+    _history_cache[user_id].append({
         "role": role,
         "content": content,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
-    if len(_history[user_id]) > 100:
-        _history[user_id] = _history[user_id][-100:]
+    if len(_history_cache[user_id]) > 100:
+        _history_cache[user_id] = _history_cache[user_id][-100:]
 
 
 class CacheService:

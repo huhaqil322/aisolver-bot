@@ -20,7 +20,7 @@ async def cmd_profile(event: Message | CallbackQuery) -> None:
         f"👤 **Your Profile**\n\n"
         f"ID: `{user.id}`\n"
         f"Username: @{user.username or 'N/A'}\n"
-        f"Status: {'⭐ Premium' if context.get('is_premium') else '🆓 Free'}\n"
+        f"Status: 🆓 Active\n"
         f"Language: {user.language_code or 'en'}\n\n"
         f"📊 **Statistics:**\n"
         f"Total requests: {context.get('total_requests', 0)}\n"

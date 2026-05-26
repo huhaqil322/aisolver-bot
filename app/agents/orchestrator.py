@@ -13,7 +13,6 @@ from app.agents.physics_agent import PhysicsAgent
 from app.agents.prompts import ORCHESTRATOR_PROMPT
 from app.agents.validator_agent import ValidatorAgent
 from app.core.ai_provider import Message, MessageRole, ProviderFactory, TokenUsage
-from app.config.settings import SubscriptionTier
 
 
 @dataclass

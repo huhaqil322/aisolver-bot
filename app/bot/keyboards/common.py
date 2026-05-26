@@ -10,9 +10,8 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     builder.button(text="📸 Upload Image", callback_data="image")
     builder.button(text="💬 History", callback_data="history")
     builder.button(text="👤 Profile", callback_data="profile")
-    builder.button(text="⭐ Premium", callback_data="premium")
     builder.button(text="❓ Help", callback_data="help")
-    builder.adjust(2, 2, 2)
+    builder.adjust(2, 2)
     return builder.as_markup()
 
 
@@ -46,17 +45,7 @@ def confirmation_keyboard(action: str) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def subscription_keyboard() -> InlineKeyboardMarkup:
-    builder = InlineKeyboardBuilder()
-    builder.button(text="⭐ Premium Monthly", callback_data="subscribe:premium:monthly")
-    builder.button(text="⭐ Premium Yearly", callback_data="subscribe:premium:yearly")
-    builder.button(text="💎 Enterprise", callback_data="subscribe:enterprise")
-    builder.button(text="↩ Back", callback_data="menu")
-    builder.adjust(2, 1, 1)
-    return builder.as_markup()
-
-
-def profile_keyboard(is_premium: bool = False) -> InlineKeyboardMarkup:
+def profile_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="📊 Stats", callback_data="profile:stats")
     builder.button(text="🔄 Reset Daily", callback_data="profile:reset")

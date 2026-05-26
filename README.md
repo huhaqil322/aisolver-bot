@@ -47,7 +47,7 @@ Advanced Telegram AI bot with multi-agent architecture for solving complex educa
 - **Multi-Provider**: OpenAI, Anthropic, OpenRouter with automatic fallback
 - **Step-by-Step**: Detailed solutions with LaTeX formatting
 - **Streaming**: Real-time response streaming
-- **Subscriptions**: Telegram Payments, tiered plans
+- **Rate Limiting**: Per-user request throttling
 - **Admin Panel**: User management, analytics, broadcast
 - **Security**: Rate limiting, spam protection, webhook validation
 - **Scalable**: Async-first, Redis queue, horizontal scaling
@@ -195,7 +195,6 @@ docker-compose up -d --build
 | `/solve <problem>` | Solve a problem |
 | `/image` | Upload image for solving |
 | `/profile` | View your stats |
-| `/premium` | Premium plans |
 | `/help` | Show help |
 | `/admin` | Admin panel (admins only) |
 

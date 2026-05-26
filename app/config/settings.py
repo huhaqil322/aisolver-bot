@@ -30,13 +30,6 @@ class AIProvider(str, Enum):
     GEMINI = "gemini"
 
 
-class SubscriptionTier(str, Enum):
-    FREE = "free"
-    BASIC = "basic"
-    PREMIUM = "premium"
-    ENTERPRISE = "enterprise"
-
-
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -59,7 +52,6 @@ class Settings(BaseSettings):
     TELEGRAM_WEBHOOK_URL: str | None = None
     TELEGRAM_WEBHOOK_SECRET: str | None = None
     TELEGRAM_ADMIN_IDS: list[int] = Field(default_factory=list)
-    TELEGRAM_PAYMENT_PROVIDER_TOKEN: SecretStr | None = None
 
     # Database
     DATABASE_URL: PostgresDsn = Field(
@@ -125,17 +117,8 @@ class Settings(BaseSettings):
     RATE_LIMIT_BURST: int = 20
 
     # User Limits
-    FREE_DAILY_LIMIT: int = 20
-    FREE_TOKENS_PER_MONTH: int = 100000
-    BASIC_DAILY_LIMIT: int = 100
-    BASIC_TOKENS_PER_MONTH: int = 500000
-    PREMIUM_DAILY_LIMIT: int = 500
-    PREMIUM_TOKENS_PER_MONTH: int = 5000000
-
-    # Payment
-    PAYMENTS_ENABLED: bool = True
-    SUBSCRIPTION_CHECK_INTERVAL_HOURS: int = 24
-    TRIAL_DAYS: int = 7
+    DAILY_LIMIT: int = 20
+    TOKENS_PER_MONTH: int = 100000
 
     # Referral
     REFERRAL_ENABLED: bool = True
@@ -209,14 +192,6 @@ class Settings(BaseSettings):
     @property
     def gemini_api_key(self) -> str | None:
         return self.GEMINI_API_KEY.get_secret_value() if self.GEMINI_API_KEY else None
-
-    @property
-    def payment_provider_token(self) -> str | None:
-        return (
-            self.TELEGRAM_PAYMENT_PROVIDER_TOKEN.get_secret_value()
-            if self.TELEGRAM_PAYMENT_PROVIDER_TOKEN
-            else None
-        )
 
     @property
     def mathpix_api_key(self) -> str | None:
