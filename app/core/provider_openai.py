@@ -152,4 +152,5 @@ class OpenAIProvider(AIProvider):
         return (prompt_tokens * gpt4o_input) + (completion_tokens * gpt4o_output)
 
 
-ProviderFactory.register("openai", OpenAIProvider())
+if settings.openai_api_key:
+    ProviderFactory.register("openai", OpenAIProvider())

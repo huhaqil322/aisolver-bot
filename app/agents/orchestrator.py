@@ -129,34 +129,39 @@ Respond with JSON only:
         total_tokens = TokenUsage()
         agent_results: dict[str, AgentResult] = {}
 
-        primary_agents = [
-            a for a in plan.agents if a not in (AgentType.VALIDATOR, AgentType.EXPLANATION, AgentType.ORCHESTRATOR)
-        ]
-        if not primary_agents:
-            primary_agents = [AgentType.MATH]
-
+        subject_to_agent = {
+            "mathematics": AgentType.MATH,
+            "physics": AgentType.PHYSICS,
+            "chemistry": AgentType.CHEMISTRY,
+            "programming": AgentType.CODE,
+            "code": AgentType.CODE,
+            "general": AgentType.MATH,
+        }
+        primary_type = subject_to_agent.get(plan.subject, AgentType.MATH)
         primary_result = None
-        for agent_type in primary_agents:
-            try:
-                agent = AgentRegistry.get(agent_type)
-                result = await agent.process(final_prompt, context)
-                agent_results[agent_type.value] = result
-                total_tokens.prompt_tokens += result.tokens_used.prompt_tokens
-                total_tokens.completion_tokens += result.tokens_used.completion_tokens
-                total_tokens.total_tokens += result.tokens_used.total_tokens
-                total_tokens.cost += result.tokens_used.cost
-                if result.error is None:
-                    primary_result = result
-                    break
-            except KeyError:
-                continue
+
+        try:
+            agent = AgentRegistry.get(primary_type)
+            result = await agent.process(final_prompt, context)
+            agent_results[primary_type.value] = result
+            total_tokens = TokenUsage(
+                prompt_tokens=result.tokens_used.prompt_tokens,
+                completion_tokens=result.tokens_used.completion_tokens,
+                total_tokens=result.tokens_used.total_tokens,
+                cost=result.tokens_used.cost,
+            )
+            if result.error is None:
+                primary_result = result
+        except Exception:
+            pass
 
         if primary_result is None:
+            error_msg = agent_results.get(primary_type.value, AgentResult(content="", agent_type=AgentType.MATH)).error or "Unknown error"
             return OrchestrationResult(
-                final_answer="I encountered an error processing your request. Please try again.",
+                final_answer=f"I encountered an error: {error_msg}",
                 plan=plan,
                 agent_results=agent_results,
-                error="All primary agents failed",
+                error=f"Primary agent failed: {error_msg}",
             )
 
         final_answer = primary_result.content

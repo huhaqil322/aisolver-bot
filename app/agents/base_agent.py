@@ -106,9 +106,7 @@ class BaseAgent(ABC):
             messages = self.build_messages(prompt, context, **kwargs)
             request = CompletionRequest(
                 messages=messages,
-                model=context.model or settings.OPENAI_MODEL,
-                max_tokens=settings.OPENAI_MAX_TOKENS,
-                temperature=settings.OPENAI_TEMPERATURE,
+                model=context.model,
                 stream=False,
             )
             response = await self.provider.complete(request)
@@ -141,9 +139,7 @@ class BaseAgent(ABC):
         messages = self.build_messages(prompt, context, **kwargs)
         request = CompletionRequest(
             messages=messages,
-            model=context.model or settings.OPENAI_MODEL,
-            max_tokens=settings.OPENAI_MAX_TOKENS,
-            temperature=settings.OPENAI_TEMPERATURE,
+            model=context.model,
             stream=True,
         )
         async for chunk in self.provider.complete_stream(request):

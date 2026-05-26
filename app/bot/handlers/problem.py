@@ -85,6 +85,14 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
     try:
         result = await orchestrator.solve(prompt, context)
 
+        if result.error:
+            await processing_msg.edit_text(
+                f"❌ {result.error}\n\nMake sure AI provider API keys are set in .env",
+                reply_markup=main_menu_keyboard(),
+            )
+            await state.clear()
+            return
+
         response_parts = []
         response_parts.append(result.final_answer)
 

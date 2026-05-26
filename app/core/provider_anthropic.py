@@ -73,7 +73,7 @@ class AnthropicProvider(AIProvider):
         }
         if system_prompt:
             payload["system"] = system_prompt
-        if request.temperature:
+        if request.temperature is not None:
             payload["temperature"] = request.temperature
 
         response = await self.client.post("/messages", json=payload)
