@@ -110,12 +110,12 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
                 try:
                     await callback.message.answer(chunk, parse_mode="Markdown")
                 except Exception:
-                    await callback.message.answer(chunk)
+                    await callback.message.answer(chunk, parse_mode=None)
         else:
             try:
                 await processing_msg.edit_text(response, parse_mode="Markdown")
             except Exception:
-                await processing_msg.edit_text(response)
+                await processing_msg.edit_text(response, parse_mode=None)
 
     except Exception as e:
         await processing_msg.edit_text(
