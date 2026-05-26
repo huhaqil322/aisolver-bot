@@ -95,8 +95,9 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
 
     except Exception as e:
         await processing_msg.edit_text(
-            f"❌ Error processing image: {str(e)[:200]}",
+            f"❌ Error: {str(e)[:200]}",
             reply_markup=main_menu_keyboard(),
+            parse_mode=None,
         )
     finally:
         await state.clear()
@@ -165,6 +166,7 @@ async def handle_document(message: Message, state: FSMContext) -> None:
         await processing_msg.edit_text(
             f"❌ Error: {str(e)[:200]}",
             reply_markup=main_menu_keyboard(),
+            parse_mode=None,
         )
     finally:
         await state.clear()

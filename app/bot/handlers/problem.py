@@ -119,9 +119,9 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
 
     except Exception as e:
         await processing_msg.edit_text(
-            f"❌ Sorry, I encountered an error while solving your problem.\n\n"
-            f"Error: {str(e)[:200]}\n\nPlease try again or rephrase your question.",
+            f"❌ Sorry, I encountered an error: {str(e)[:200]}",
             reply_markup=main_menu_keyboard(),
+            parse_mode=None,
         )
 
     finally:
