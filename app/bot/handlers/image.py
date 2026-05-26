@@ -82,9 +82,15 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
         response = result.final_answer
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
-                await message.answer(response[i : i + 4000], parse_mode="Markdown")
+                try:
+                    await message.answer(response[i : i + 4000], parse_mode="Markdown")
+                except Exception:
+                    await message.answer(response[i : i + 4000])
         else:
-            await processing_msg.edit_text(response, parse_mode="Markdown")
+            try:
+                await processing_msg.edit_text(response, parse_mode="Markdown")
+            except Exception:
+                await processing_msg.edit_text(response)
 
     except Exception as e:
         await processing_msg.edit_text(
@@ -143,9 +149,15 @@ async def handle_document(message: Message, state: FSMContext) -> None:
         response = result.final_answer
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
-                await message.answer(response[i : i + 4000], parse_mode="Markdown")
+                try:
+                    await message.answer(response[i : i + 4000], parse_mode="Markdown")
+                except Exception:
+                    await message.answer(response[i : i + 4000])
         else:
-            await processing_msg.edit_text(response, parse_mode="Markdown")
+            try:
+                await processing_msg.edit_text(response, parse_mode="Markdown")
+            except Exception:
+                await processing_msg.edit_text(response)
 
     except Exception as e:
         await processing_msg.edit_text(

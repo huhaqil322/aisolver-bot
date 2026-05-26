@@ -107,9 +107,15 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
                 chunk = response[i : i + 4000]
-                await callback.message.answer(chunk, parse_mode="Markdown")
+                try:
+                    await callback.message.answer(chunk, parse_mode="Markdown")
+                except Exception:
+                    await callback.message.answer(chunk)
         else:
-            await processing_msg.edit_text(response, parse_mode="Markdown")
+            try:
+                await processing_msg.edit_text(response, parse_mode="Markdown")
+            except Exception:
+                await processing_msg.edit_text(response)
 
     except Exception as e:
         await processing_msg.edit_text(
