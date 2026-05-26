@@ -84,7 +84,7 @@ class Settings(BaseSettings):
 
     # AI Providers - OpenRouter
     OPENROUTER_API_KEY: SecretStr | None = None
-    OPENROUTER_MODEL: str = "google/gemini-2.0-flash-lite-preview-02-05:free"
+    OPENROUTER_MODEL: str = "openrouter/free"
     OPENROUTER_MAX_TOKENS: int = 4096
     OPENROUTER_TEMPERATURE: float = 0.3
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"
