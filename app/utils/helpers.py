@@ -51,6 +51,10 @@ def safe_get(data: dict[str, Any], *keys: str, default: Any = None) -> Any:
     return data
 
 
+def sanitize_for_markdown(text: str) -> str:
+    return text.replace("_", "＿")
+
+
 _LATEX_UNICODE: dict[str, str] = {
     r"\alpha": "α", r"\beta": "β", r"\gamma": "γ", r"\delta": "δ",
     r"\epsilon": "ε", r"\zeta": "ζ", r"\eta": "η", r"\theta": "θ",

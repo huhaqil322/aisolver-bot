@@ -9,6 +9,7 @@ from aiogram.types import CallbackQuery, Message
 from app.agents.orchestrator import AgentContext, OrchestratorAgent
 from app.bot.keyboards.common import cancel_keyboard, main_menu_keyboard, subject_keyboard
 from app.config.settings import get_settings
+from app.services.memory import add_to_history
 from app.utils.helpers import clean_latex_for_telegram
 from app.utils.i18n import _, resolve_lang
 
@@ -53,6 +54,8 @@ async def handle_problem_text(message: Message, state: FSMContext) -> None:
 
     await state.update_data(prompt=prompt)
     await state.set_state(ProblemStates.waiting_for_subject)
+
+    await add_to_history(user.id, "user", prompt)
 
     await message.answer(
         _("select_subject", lang),
@@ -108,6 +111,7 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
 
         response = "\n".join(response_parts)
         response = clean_latex_for_telegram(response)
+        await add_to_history(user.id, "assistant", result.final_answer)
 
         if len(response) > 4000:
             for i in range(0, len(response), 4000):

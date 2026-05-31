@@ -12,6 +12,7 @@ from app.agents.orchestrator import AgentContext, OrchestratorAgent
 from app.bot.keyboards.common import cancel_keyboard, main_menu_keyboard
 from app.config.settings import get_settings
 from app.ocr.pipeline import OCRPipeline
+from app.services.memory import add_to_history
 from app.utils.helpers import clean_latex_for_telegram
 from app.utils.i18n import _, resolve_lang
 
@@ -83,6 +84,11 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
         result = await orchestrator.solve("", context, ocr_text=ocr_result.text)
 
         response = clean_latex_for_telegram(result.final_answer)
+
+        if user:
+            await add_to_history(user.id, "user", ocr_result.text)
+            await add_to_history(user.id, "assistant", result.final_answer)
+
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
                 chunk = response[i : i + 4000]
@@ -153,6 +159,11 @@ async def handle_document(message: Message, state: FSMContext) -> None:
         result = await orchestrator.solve("", context, ocr_text=ocr_result.text)
 
         response = clean_latex_for_telegram(result.final_answer)
+
+        if user:
+            await add_to_history(user.id, "user", ocr_result.text)
+            await add_to_history(user.id, "assistant", result.final_answer)
+
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
                 chunk = response[i : i + 4000]

@@ -4,6 +4,7 @@ from aiogram.types import CallbackQuery, Message
 
 from app.bot.keyboards.common import profile_keyboard, settings_keyboard
 from app.services.memory import get_user_context
+from app.utils.helpers import sanitize_for_markdown
 from app.utils.i18n import _, resolve_lang
 
 router = Router(name="profile")
@@ -20,7 +21,7 @@ async def cmd_profile(event: Message | CallbackQuery) -> None:
 
     text = _("profile_title", lang,
              id=user.id,
-             username=user.username or _("n_a", lang),
+             username=sanitize_for_markdown(user.username or _("n_a", lang)),
              language=user.language_code or "en",
              total_requests=context.get("total_requests", 0),
              daily_requests=context.get("daily_requests", 0),
