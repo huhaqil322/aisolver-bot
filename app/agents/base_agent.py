@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
+from app.config.settings import get_settings
 from app.core.ai_provider import (
     AIProvider,
     CompletionRequest,
-    CompletionResponse,
     Message,
     MessageRole,
     ProviderFactory,
     TokenUsage,
 )
-from app.config.settings import get_settings
 
 settings = get_settings()
 
@@ -33,12 +32,12 @@ class AgentType(str, Enum):
 @dataclass
 class AgentContext:
     user_id: str
-    conversation_id: Optional[str] = None
+    conversation_id: str | None = None
     language: str = "en"
     explanation_level: str = "intermediate"
-    provider: Optional[str] = None
-    model: Optional[str] = None
-    subject: Optional[str] = None
+    provider: str | None = None
+    model: str | None = None
+    subject: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
@@ -48,10 +47,10 @@ class AgentResult:
     agent_type: AgentType
     confidence: float = 1.0
     tokens_used: TokenUsage = field(default_factory=TokenUsage)
-    provider: Optional[str] = None
-    model: Optional[str] = None
+    provider: str | None = None
+    model: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
-    error: Optional[str] = None
+    error: str | None = None
     requires_verification: bool = True
 
 
@@ -60,7 +59,7 @@ class BaseAgent(ABC):
         self,
         agent_type: AgentType,
         system_prompt: str,
-        provider_name: Optional[str] = None,
+        provider_name: str | None = None,
     ) -> None:
         self.agent_type = agent_type
         self.system_prompt = system_prompt
@@ -81,8 +80,14 @@ class BaseAgent(ABC):
     def build_messages(
         self, prompt: str, context: AgentContext, **kwargs: Any
     ) -> list[Message]:
+        lang = context.language if context.language and context.language != "en" else None
+        system_content = self.system_prompt
+        if lang:
+            lang_name = {"ru": "Russian", "uk": "Russian", "be": "Russian"}.get(lang, "English")
+            system_content += f"\n\nIMPORTANT: Always respond in {lang_name}. Use the user's language for all responses."
+
         messages: list[Message] = [
-            Message(role=MessageRole.SYSTEM, content=self.system_prompt),
+            Message(role=MessageRole.SYSTEM, content=system_content),
         ]
 
         if context.metadata.get("history"):

@@ -13,6 +13,7 @@ from app.bot.keyboards.common import cancel_keyboard, main_menu_keyboard
 from app.config.settings import get_settings
 from app.ocr.pipeline import OCRPipeline
 from app.utils.helpers import clean_latex_for_telegram
+from app.utils.i18n import _, resolve_lang
 
 settings = get_settings()
 router = Router(name="image")
@@ -28,22 +29,24 @@ class ImageStates(StatesGroup):
 @router.message(Command("image"))
 @router.callback_query(F.data == "image")
 async def cmd_image(event: Message | CallbackQuery, state: FSMContext) -> None:
-    text = "Please send me an image of the problem. Supported formats: PNG, JPG, JPEG, BMP, TIFF, WebP"
+    lang = resolve_lang(event.from_user.language_code if event.from_user else None)
+    text = _("image_prompt", lang)
     await state.set_state(ImageStates.waiting_for_image)
     if isinstance(event, Message):
-        await event.answer(text, reply_markup=cancel_keyboard())
+        await event.answer(text, reply_markup=cancel_keyboard(lang))
     else:
-        await event.message.edit_text(text, reply_markup=cancel_keyboard())
+        await event.message.edit_text(text, reply_markup=cancel_keyboard(lang))
         await event.answer()
 
 
 @router.message(ImageStates.waiting_for_image, F.photo)
 async def handle_photo(message: Message, state: FSMContext) -> None:
+    lang = resolve_lang(message.from_user.language_code if message.from_user else None)
     if not message.photo:
         return
 
     photo = message.photo[-1]
-    processing_msg = await message.answer("📸 Processing image with OCR...")
+    processing_msg = await message.answer(_("processing_image", lang))
 
     try:
         file = await message.bot.get_file(photo.file_id)
@@ -56,17 +59,18 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
 
         if not ocr_result.text.strip():
             await processing_msg.edit_text(
-                "❌ Could not extract text from the image. Please try with a clearer image.",
-                reply_markup=main_menu_keyboard(),
+                _("no_text_found", lang),
+                reply_markup=main_menu_keyboard(lang),
             )
             await state.clear()
             return
 
+        review = _("low_confidence", lang) if ocr_result.needs_review else ""
         await processing_msg.edit_text(
-            f"📝 **Extracted Text:**\n{ocr_result.text[:500]}{'...' if len(ocr_result.text) > 500 else ''}\n\n"
-            f"Confidence: {ocr_result.confidence:.0%}\n"
-            f"{'⚠️ Low confidence - results may need review.' if ocr_result.needs_review else ''}\n\n"
-            f"🧠 Now solving...",
+            _("extracted_text", lang,
+              text=ocr_result.text[:500] + ("..." if len(ocr_result.text) > 500 else ""),
+              confidence=ocr_result.confidence,
+              review=review),
         )
 
         user = message.from_user
@@ -94,8 +98,8 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
 
     except Exception as e:
         await processing_msg.edit_text(
-            f"❌ Error: {str(e)[:200]}",
-            reply_markup=main_menu_keyboard(),
+            _("error_ocr", lang, error=str(e)[:200]),
+            reply_markup=main_menu_keyboard(lang),
             parse_mode=None,
         )
     finally:
@@ -104,6 +108,7 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
 
 @router.message(ImageStates.waiting_for_image, F.document)
 async def handle_document(message: Message, state: FSMContext) -> None:
+    lang = resolve_lang(message.from_user.language_code if message.from_user else None)
     if not message.document:
         return
 
@@ -111,15 +116,15 @@ async def handle_document(message: Message, state: FSMContext) -> None:
     ext = Path(doc.file_name or "file.png").suffix.lower().lstrip(".")
     if ext not in settings.SUPPORTED_IMAGE_FORMATS:
         await message.answer(
-            f"Unsupported format: {ext}. Supported: {', '.join(settings.SUPPORTED_IMAGE_FORMATS)}"
+            _("unsupported_format", lang, ext=ext, formats=", ".join(settings.SUPPORTED_IMAGE_FORMATS))
         )
         return
 
     if doc.file_size and doc.file_size > settings.MAX_IMAGE_SIZE_MB * 1024 * 1024:
-        await message.answer(f"File too large. Max size: {settings.MAX_IMAGE_SIZE_MB}MB")
+        await message.answer(_("file_too_large", lang, max_size=settings.MAX_IMAGE_SIZE_MB))
         return
 
-    processing_msg = await message.answer("📸 Processing document...")
+    processing_msg = await message.answer(_("processing_image", lang))
 
     try:
         file = await message.bot.get_file(doc.file_id)
@@ -132,8 +137,8 @@ async def handle_document(message: Message, state: FSMContext) -> None:
 
         if not ocr_result.text.strip():
             await processing_msg.edit_text(
-                "❌ Could not extract text from the document.",
-                reply_markup=main_menu_keyboard(),
+                _("no_text_found", lang),
+                reply_markup=main_menu_keyboard(lang),
             )
             await state.clear()
             return
@@ -163,8 +168,8 @@ async def handle_document(message: Message, state: FSMContext) -> None:
 
     except Exception as e:
         await processing_msg.edit_text(
-            f"❌ Error: {str(e)[:200]}",
-            reply_markup=main_menu_keyboard(),
+            _("error_ocr", lang, error=str(e)[:200]),
+            reply_markup=main_menu_keyboard(lang),
             parse_mode=None,
         )
     finally:

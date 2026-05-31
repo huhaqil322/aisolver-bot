@@ -10,6 +10,7 @@ from app.agents.orchestrator import AgentContext, OrchestratorAgent
 from app.bot.keyboards.common import cancel_keyboard, main_menu_keyboard, subject_keyboard
 from app.config.settings import get_settings
 from app.utils.helpers import clean_latex_for_telegram
+from app.utils.i18n import _, resolve_lang
 
 settings = get_settings()
 router = Router(name="problem")
@@ -25,23 +26,25 @@ class ProblemStates(StatesGroup):
 @router.message(Command("solve"))
 @router.callback_query(F.data == "solve")
 async def cmd_solve(event: Message | CallbackQuery, state: FSMContext) -> None:
-    text = "Please send me the problem you want me to solve. You can type it or upload an image."
+    lang = resolve_lang(event.from_user.language_code if event.from_user else None)
+    text = _("solve_prompt", lang)
     await state.set_state(ProblemStates.waiting_for_problem)
     if isinstance(event, Message):
-        await event.answer(text, reply_markup=cancel_keyboard())
+        await event.answer(text, reply_markup=cancel_keyboard(lang))
     else:
-        await event.message.edit_text(text, reply_markup=cancel_keyboard())
+        await event.message.edit_text(text, reply_markup=cancel_keyboard(lang))
         await event.answer()
 
 
 @router.message(ProblemStates.waiting_for_problem)
 async def handle_problem_text(message: Message, state: FSMContext) -> None:
+    lang = resolve_lang(message.from_user.language_code if message.from_user else None)
     if not message.text:
-        await message.answer("Please send text or an image.", reply_markup=cancel_keyboard())
+        await message.answer(_("send_text_or_image", lang), reply_markup=cancel_keyboard(lang))
         return
     prompt = message.text.strip()
     if len(prompt) > settings.MAX_PROMPT_LENGTH:
-        await message.answer(f"Problem too long. Max {settings.MAX_PROMPT_LENGTH} characters.")
+        await message.answer(_("too_long", lang, max=settings.MAX_PROMPT_LENGTH))
         return
 
     user = message.from_user
@@ -52,26 +55,29 @@ async def handle_problem_text(message: Message, state: FSMContext) -> None:
     await state.set_state(ProblemStates.waiting_for_subject)
 
     await message.answer(
-        "Select the subject area for better results:",
-        reply_markup=subject_keyboard(),
+        _("select_subject", lang),
+        reply_markup=subject_keyboard(lang),
     )
 
 
 @router.callback_query(ProblemStates.waiting_for_subject, F.data.startswith("subject:"))
 async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -> None:
+    lang = resolve_lang(callback.from_user.language_code if callback.from_user else None)
     subject = callback.data.split(":", 1)[1]
     data = await state.get_data()
     prompt = data.get("prompt", "")
     user = callback.from_user
 
     if not user or not prompt:
-        await callback.message.edit_text("Something went wrong. Please start again.", reply_markup=main_menu_keyboard())
+        await callback.message.edit_text(
+            _("something_wrong", lang), reply_markup=main_menu_keyboard(lang)
+        )
         await state.clear()
         return
 
     await state.set_state(ProblemStates.processing)
     processing_msg = await callback.message.edit_text(
-        "🧠 Analyzing your problem...\nThis may take a moment.",
+        _("analyzing", lang),
         reply_markup=None,
     )
 
@@ -86,8 +92,8 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
 
         if result.error:
             await processing_msg.edit_text(
-                f"❌ {result.error}\n\nMake sure AI provider API keys are set in .env",
-                reply_markup=main_menu_keyboard(),
+                _("ai_error", lang, error=result.error),
+                reply_markup=main_menu_keyboard(lang),
             )
             await state.clear()
             return
@@ -97,7 +103,7 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
 
         if result.plan.needs_validation and result.validation_result and result.validation_result.confidence < 0.7:
             response_parts.append(
-                f"\n\n⚠️ *Validation confidence: {result.validation_result.confidence:.0%}*"
+                _("validation_note", lang, confidence=result.validation_result.confidence)
             )
 
         response = "\n".join(response_parts)
@@ -118,8 +124,8 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
 
     except Exception as e:
         await processing_msg.edit_text(
-            f"❌ Sorry, I encountered an error: {str(e)[:200]}",
-            reply_markup=main_menu_keyboard(),
+            _("processing_error", lang, error=str(e)[:200]),
+            reply_markup=main_menu_keyboard(lang),
             parse_mode=None,
         )
 
@@ -129,4 +135,5 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
 
 @router.message(ProblemStates.processing)
 async def ignore_during_processing(message: Message) -> None:
-    await message.answer("Please wait, I'm still processing your previous request...")
+    lang = resolve_lang(message.from_user.language_code if message.from_user else None)
+    await message.answer(_("wait_processing", lang))

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from typing import Any, Optional
 
 from app.agents.base_agent import AgentContext, AgentResult, AgentType, BaseAgent
 from app.agents.chemistry_agent import ChemistryAgent
@@ -12,7 +11,7 @@ from app.agents.math_agent import MathAgent
 from app.agents.physics_agent import PhysicsAgent
 from app.agents.prompts import ORCHESTRATOR_PROMPT
 from app.agents.validator_agent import ValidatorAgent
-from app.core.ai_provider import Message, MessageRole, ProviderFactory, TokenUsage
+from app.core.ai_provider import TokenUsage
 
 
 @dataclass
@@ -30,11 +29,11 @@ class OrchestrationResult:
     final_answer: str
     plan: OrchestrationPlan
     agent_results: dict[str, AgentResult] = field(default_factory=dict)
-    validation_result: Optional[AgentResult] = None
-    explanation_result: Optional[AgentResult] = None
+    validation_result: AgentResult | None = None
+    explanation_result: AgentResult | None = None
     total_tokens: TokenUsage = field(default_factory=TokenUsage)
     confidence: float = 1.0
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class AgentRegistry:
@@ -108,7 +107,7 @@ Respond with JSON only:
                 needs_validation=plan_data.get("needs_validation", True),
                 needs_explanation=plan_data.get("needs_explanation", True),
             )
-        except (json.JSONDecodeError, KeyError, AttributeError) as e:
+        except (json.JSONDecodeError, KeyError, AttributeError):
             return OrchestrationPlan(
                 subject="general",
                 agents=[AgentType.MATH],
@@ -121,7 +120,7 @@ Respond with JSON only:
         self,
         prompt: str,
         context: AgentContext,
-        ocr_text: Optional[str] = None,
+        ocr_text: str | None = None,
     ) -> OrchestrationResult:
         final_prompt = ocr_text if ocr_text else prompt
 
@@ -155,13 +154,27 @@ Respond with JSON only:
         except Exception:
             pass
 
+        lang = context.language or "en"
+        _lang_map = {"ru": "ru", "uk": "ru", "be": "ru"}
+        ui_lang = _lang_map.get(lang, "en")
+        error_msg_text = (
+            "Произошла ошибка:" if ui_lang == "ru" else "I encountered an error:"
+        )
+        validation_text = (
+            "\n\n⚠️ **Примечание проверки:** Уверенность: {confidence:.0%}. "
+            "Пожалуйста, проверьте результат самостоятельно."
+            if ui_lang == "ru"
+            else "\n\n⚠️ **Validation Note:** Confidence: {confidence:.0%}. "
+            "Please verify the results independently."
+        )
+
         if primary_result is None:
-            error_msg = agent_results.get(primary_type.value, AgentResult(content="", agent_type=AgentType.MATH)).error or "Unknown error"
+            err = agent_results.get(primary_type.value, AgentResult(content="", agent_type=AgentType.MATH)).error or "Unknown error"
             return OrchestrationResult(
-                final_answer=f"I encountered an error: {error_msg}",
+                final_answer=f"{error_msg_text} {err}",
                 plan=plan,
                 agent_results=agent_results,
-                error=f"Primary agent failed: {error_msg}",
+                error=f"Primary agent failed: {err}",
             )
 
         final_answer = primary_result.content
@@ -181,10 +194,7 @@ Respond with JSON only:
                 total_tokens.cost += validation_result.tokens_used.cost
 
                 if validation_result.confidence < plan.confidence_threshold:
-                    final_answer += (
-                        f"\n\n⚠️ **Validation Note:** Confidence: {validation_result.confidence:.0%}. "
-                        f"Please verify the results independently."
-                    )
+                    final_answer += validation_text.format(confidence=validation_result.confidence)
                 confidence = min(confidence, validation_result.confidence)
             except KeyError:
                 pass
