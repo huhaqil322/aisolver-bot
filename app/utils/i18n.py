@@ -115,110 +115,14 @@ TRANSLATIONS: dict[str, dict[str, str]] = {
 
         # --- Common ---
         "n_a": "N/A",
-        "or": "или",
-    },
-    LANG_EN: {
-        "welcome": (
-            "Hello, {name}! 👋\n\n"
-            "I am an advanced AI solver bot. I can help you with:\n"
-            "• Mathematics & Olympiad problems\n"
-            "• Physics, Chemistry, Programming\n"
-            "• Image analysis with OCR\n"
-            "• Step-by-step explanations\n\n"
-            "Select an option below to get started:"
-        ),
-        "help": (
-            "🤖 **AI Solver Bot Help**\n\n"
-            "**Commands:**\n"
-            "/start — Start the bot\n"
-            "/solve — Solve a problem\n"
-            "/image — Upload an image\n"
-            "/help — Show this help\n"
-            "/profile — Your profile & stats\n\n"
-            "**How to use:**\n"
-            "1. Type or paste your problem\n"
-            "2. Upload an image of the problem\n"
-            "3. Select a subject for better results\n\n"
-            "**Supported:** Math, Physics, Chemistry, Programming, and more!"
-        ),
-        "main_menu": "Main Menu — Select an option:",
-        "action_cancelled": "Action cancelled. Returning to menu.",
-
-        "solve_prompt": "Please send me the problem you want me to solve. You can type it or upload an image.",
-        "select_subject": "Select the subject area for better results:",
-        "analyzing": "🧠 Analyzing your problem...\nThis may take a moment.",
-        "ai_error": "❌ {error}\n\nMake sure AI provider API keys are set in .env",
-        "validation_note": "\n\n⚠️ *Validation confidence: {confidence:.0%}*",
-        "processing_error": "❌ Sorry, I encountered an error: {error}",
-        "something_wrong": "Something went wrong. Please start again.",
-        "wait_processing": "Please wait, I'm still processing your previous request...",
-        "too_long": "Problem too long. Max {max} characters.",
-        "send_text_or_image": "Please send text or an image.",
-
-        "image_prompt": "Please send me an image of the problem. Supported formats: PNG, JPG, JPEG, BMP, TIFF, WebP",
-        "processing_image": "📸 Processing image with OCR...",
-        "no_text_found": "❌ Could not extract text from the image. Please try with a clearer image.",
-        "extracted_text": "📝 **Extracted Text:**\n{text}\n\nConfidence: {confidence:.0%}\n{review}\n\n🧠 Now solving...",
-        "low_confidence": "⚠️ Low confidence — results may need review.",
-        "unsupported_format": "Unsupported format: {ext}. Supported: {formats}",
-        "file_too_large": "File too large. Max size: {max_size}MB",
-        "error_ocr": "❌ Error: {error}",
-
-        "profile_title": "👤 **Your Profile**\n\n"
-        "ID: `{id}`\n"
-        "Username: @{username}\n"
-        "Status: 🆓 Active\n"
-        "Language: {language}\n\n"
-        "📊 **Statistics:**\n"
-        "Total requests: {total_requests}\n"
-        "Today: {daily_requests}\n"
-        "Tokens used: {total_tokens}\n\n"
-        "📅 Joined: {created_at}",
-        "stats_title": "📊 **Detailed Stats**\n\n"
-        "• Total Requests: {total_requests}\n"
-        "• Daily Requests: {daily_requests}\n"
-        "• Monthly Tokens: {monthly_tokens}\n"
-        "• Total Tokens: {total_tokens}\n"
-        "• Conversations: {conversations_count}\n"
-        "• Referrals: {referral_count}\n\n"
-        "⚡ Daily limit: {daily_limit}\n"
-        "📅 Monthly limit: {monthly_limit}",
-        "settings_title": "⚙️ **Settings**\n\nCustomize your experience:",
-        "daily_reset": "✅ Daily usage has been reset.",
-
-        "lang_ru": "Русский",
-        "lang_en": "English",
-        "status_active": "🆓 Active",
-
-        "subject_mathematics": "Mathematics",
-        "subject_physics": "Physics",
-        "subject_chemistry": "Chemistry",
-        "subject_programming": "Programming",
-        "subject_general": "General",
-
-        "btn_solve": "🧮 Solve Problem",
-        "btn_image": "📸 Upload Image",
-        "btn_history": "💬 History",
-        "btn_profile": "👤 Profile",
-        "btn_help": "❓ Help",
-        "btn_back": "↩ Back",
-        "btn_cancel": "Cancel",
-        "btn_confirm": "✅ Confirm",
-        "btn_stats": "📊 Stats",
-        "btn_reset": "🔄 Reset Daily",
-        "btn_settings": "⚙️ Settings",
-        "btn_menu": "↩ Menu",
-        "btn_language": "🌐 Language",
-        "btn_level": "📚 Explanation Level",
-        "btn_provider": "🤖 AI Provider",
-        "btn_usage": "📝 How to Use",
-        "btn_subjects": "📚 Supported Subjects",
-        "btn_tips": "💡 Tips",
-        "btn_prev": "◀ Prev",
-        "btn_next": "Next ▶",
-
-        "n_a": "N/A",
         "or": "or",
+
+        # --- History ---
+        "history_empty": "**Conversation History**\n\nNo conversations yet. Start by solving a problem!",
+        "history_title": "💬 **Recent Conversations**",
+        "history_you": "👤 You",
+        "history_bot": "🤖 Bot",
+        "history_footer": "Use /solve to start a new conversation.",
     },
 }
 
