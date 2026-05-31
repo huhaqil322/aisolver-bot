@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import CallbackQuery, Message
 
 from app.agents.orchestrator import AgentContext, OrchestratorAgent
-from app.bot.keyboards.common import subject_keyboard, cancel_keyboard, main_menu_keyboard
+from app.bot.keyboards.common import cancel_keyboard, main_menu_keyboard, subject_keyboard
 from app.config.settings import get_settings
-from app.services.memory import get_user_context
+from app.utils.helpers import clean_latex_for_telegram
 
 settings = get_settings()
 router = Router(name="problem")
@@ -48,7 +48,6 @@ async def handle_problem_text(message: Message, state: FSMContext) -> None:
     if not user:
         return
 
-    context = await get_user_context(user)
     await state.update_data(prompt=prompt)
     await state.set_state(ProblemStates.waiting_for_subject)
 
@@ -96,13 +95,13 @@ async def handle_subject_selection(callback: CallbackQuery, state: FSMContext) -
         response_parts = []
         response_parts.append(result.final_answer)
 
-        if result.plan.needs_validation and result.validation_result:
-            if result.validation_result.confidence < 0.7:
-                response_parts.append(
-                    f"\n\n⚠️ *Validation confidence: {result.validation_result.confidence:.0%}*"
-                )
+        if result.plan.needs_validation and result.validation_result and result.validation_result.confidence < 0.7:
+            response_parts.append(
+                f"\n\n⚠️ *Validation confidence: {result.validation_result.confidence:.0%}*"
+            )
 
         response = "\n".join(response_parts)
+        response = clean_latex_for_telegram(response)
 
         if len(response) > 4000:
             for i in range(0, len(response), 4000):

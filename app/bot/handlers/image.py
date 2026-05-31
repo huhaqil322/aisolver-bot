@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import io
 from pathlib import Path
 
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -13,7 +12,7 @@ from app.agents.orchestrator import AgentContext, OrchestratorAgent
 from app.bot.keyboards.common import cancel_keyboard, main_menu_keyboard
 from app.config.settings import get_settings
 from app.ocr.pipeline import OCRPipeline
-from app.services.memory import get_user_context
+from app.utils.helpers import clean_latex_for_telegram
 
 settings = get_settings()
 router = Router(name="image")
@@ -79,7 +78,7 @@ async def handle_photo(message: Message, state: FSMContext) -> None:
 
         result = await orchestrator.solve("", context, ocr_text=ocr_result.text)
 
-        response = result.final_answer
+        response = clean_latex_for_telegram(result.final_answer)
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
                 chunk = response[i : i + 4000]
@@ -148,7 +147,7 @@ async def handle_document(message: Message, state: FSMContext) -> None:
 
         result = await orchestrator.solve("", context, ocr_text=ocr_result.text)
 
-        response = result.final_answer
+        response = clean_latex_for_telegram(result.final_answer)
         if len(response) > 4000:
             for i in range(0, len(response), 4000):
                 chunk = response[i : i + 4000]
